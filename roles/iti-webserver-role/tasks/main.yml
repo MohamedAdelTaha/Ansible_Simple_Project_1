@@ -1,2 +1,44 @@
 ---
-# tasks file for roles/iti-webserver-role
+- name: Install nginx for Ubuntu
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes 
+  when: ansible_facts.distribution == 'Ubuntu'
+
+- name: Check if epel repos install in 'Amazon linux'
+  stat:
+    path: /etc/yum.repos.d/{{ repo }}
+  loop:
+    - epel.repo
+    - epel-testing.repo
+  loop_control:
+    loop_var: repo 
+  register: stat_results
+  when:
+    - ansible_facts.distribution == 'Amazon'
+    - false in exists_list
+  vars:
+    exists_list: "{{ stat_results.results | json_query('[*].stat.exists') | default([], true) }}"
+
+- name: Install nginx for RHEL/Amazon linux
+  yum:
+    name: nginx
+    state: present
+    update_cache: yes
+  when: ansible_facts.distribution in ['Amazon', 'RedHat']
+
+- name: Start nginx for all "Ubuntu, Amazon, RedHat"
+  service: 
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Add web page for all "Ubuntu, Amazon, RedHat"
+  template:
+    src: index.html.j2
+    dest: "{{ '/var/www/html/index.html' if ansible_facts.distribution == 'Ubuntu' else '/usr/share/nginx/html/index.html' }}"
+    mode: '644'
+  when: ansible_facts.distribution in ['Ubuntu', 'Amazon', 'RedHat']
+  notify:
+    - Restart nginx service
