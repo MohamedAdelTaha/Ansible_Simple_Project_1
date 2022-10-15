@@ -1,0 +1,4 @@
+[webservers]
+webserver1 ansible_host='{{ pub_ip_1 }}' ansible_user='{{ remoteUser1 }}'
+webserver2 ansible_host='{{ pub_ip_2 }}' ansible_user='{{ remoteUser2 }}'
+webserver3 ansible_host='{{ pub_ip_3 }}' ansible_user='{{ remoteUser3 }}'

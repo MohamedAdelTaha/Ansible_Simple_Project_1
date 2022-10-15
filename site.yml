@@ -1,0 +1,5 @@
+---
+- name: Install ITI WebServer
+  hosts: webservers
+  roles:
+    - iti-webserver-role
